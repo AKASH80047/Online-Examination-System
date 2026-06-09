@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "66705521417",
+    "project_id": "exam-paper-87314",
+    "storage_bucket": "exam-paper-87314.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:66705521417:android:c6e78fcfb5256e6b8631d8",
+        "android_client_info": {
+          "package_name": "com.example.exam_paper"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh2ItBaYrgMYFgiVAt4vOAxIBGIlN0A_0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
