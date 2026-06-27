@@ -208,23 +208,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       children: [
         // Title
         Container(
-          width: 52,
-          height: 52,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
-          child: const Icon(Icons.school_rounded, color: Colors.white, size: 28),
+          child: const Icon(Icons.school_rounded, color: Colors.white, size: 24),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         const Text(
           'Sign In',
           style: TextStyle(
-            fontSize: 30,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Color(0xFF111827),
             letterSpacing: -0.5,
@@ -236,27 +236,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           style: TextStyle(
             fontSize: 14,
             color: Color(0xFF6B7280),
-            height: 1.5,
+            height: 1.4,
           ),
         ),
-        const SizedBox(height: 36),
+        const SizedBox(height: 24),
 
         // Email Field
         const Text(
           'Email Address',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Color(0xFF374151),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextField(
           controller: _emailController,
           decoration: InputDecoration(
             hintText: 'you@example.com',
             hintStyle: const TextStyle(color: Color(0xFFD1D5DB)),
-            prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF9CA3AF)),
+            prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF9CA3AF), size: 20),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -271,35 +271,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
         // Password Field
         const Text(
           'Password',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Color(0xFF374151),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextField(
           controller: _passwordController,
           decoration: InputDecoration(
             hintText: '••••••••',
             hintStyle: const TextStyle(color: Color(0xFFD1D5DB)),
-            prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF9CA3AF)),
+            prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF9CA3AF), size: 20),
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
                 color: const Color(0xFF9CA3AF),
+                size: 20,
               ),
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
             ),
@@ -317,13 +318,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
           obscureText: _obscurePassword,
           onSubmitted: (_) => _login(),
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 4),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -342,16 +343,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             child: const Text(
               'Forgot Password?',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
 
         // Sign In Button
         SizedBox(
-          height: 52,
+          height: 48,
           child: ElevatedButton(
             onPressed: _isLoading ? null : _login,
             style: ElevatedButton.styleFrom(
@@ -364,8 +365,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             child: _isLoading
                 ? const SizedBox(
-                    height: 22,
-                    width: 22,
+                    height: 20,
+                    width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -374,7 +375,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 : const Text(
                     'Sign In',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.3,
                     ),
@@ -382,7 +383,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           ),
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.25))),
@@ -390,13 +391,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 'or',
-                style: TextStyle(color: Colors.grey.withValues(alpha: 0.6), fontSize: 13),
+                style: TextStyle(color: Colors.grey.withValues(alpha: 0.6), fontSize: 12),
               ),
             ),
             Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.25))),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
 
         // Sign Up Link
         Row(
@@ -404,7 +405,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           children: [
             const Text(
               "Don't have an account?",
-              style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
+              style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),
             TextButton(
               onPressed: () => context.push(RoutePaths.signup),
@@ -414,7 +415,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
               child: const Text(
                 'Create Account',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
           ],
@@ -473,9 +474,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 52.0,
-                                    vertical: 40.0,
+                                    vertical: 24.0,
                                   ),
-                                  child: Center(child: _buildLoginForm()),
+                                  child: Center(
+                                    child: SingleChildScrollView(
+                                      child: _buildLoginForm(),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
