@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:exam_paper/question_entity.dart';
 import 'package:exam_paper/exam_providers.dart';
+import 'package:exam_paper/presentation/admin/widgets/admin_appbar.dart';
+import 'package:exam_paper/presentation/admin/widgets/admin_drawer.dart';
+import 'package:exam_paper/presentation/admin/widgets/admin_sidebar.dart';
 
 class EditQuestionScreen extends ConsumerStatefulWidget {
   final String examId;
@@ -22,6 +25,7 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
   final List<TextEditingController> _optionControllers = [];
 
   QuestionType _type = QuestionType.single;
+  DifficultyLevel _difficulty = DifficultyLevel.medium;
   List<int> _correctIndices = [];
   bool _isLoading = false;
 
@@ -32,6 +36,7 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
     _explanationController.text = widget.question.explanation ?? '';
     _subjectController.text = widget.question.subject;
     _type = widget.question.type;
+    _difficulty = widget.question.difficulty;
     _correctIndices = List.from(widget.question.correctOptionIndices);
     for (var opt in widget.question.options) {
       _optionControllers.add(TextEditingController(text: opt));
@@ -47,9 +52,7 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
       _optionControllers[index].dispose();
       _optionControllers.removeAt(index);
       _correctIndices.removeWhere((i) => i == index);
-      _correctIndices = _correctIndices
-          .map((i) => i > index ? i - 1 : i)
-          .toList();
+      _correctIndices = _correctIndices.map((i) => i > index ? i - 1 : i).toList();
     });
   }
 
@@ -72,7 +75,7 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
     if (_correctIndices.isEmpty) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select at least one correct answer')),
+        const SnackBar(content: Text('Select at least one correct answer option')),
       );
       return;
     }
@@ -87,11 +90,10 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
         explanation: _explanationController.text.trim(),
         type: _type,
         subject: _subjectController.text.trim(),
+        difficulty: _difficulty,
       );
 
-      await ref
-          .read(examRepositoryProvider)
-          .updateQuestion(widget.examId, question);
+      await ref.read(examRepositoryProvider).updateQuestion(widget.examId, question);
 
       ref.invalidate(examQuestionsProvider(widget.examId));
       if (!mounted) return;
@@ -101,9 +103,7 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
     } catch (e) {
       if (!mounted) return;
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) {
@@ -125,129 +125,262 @@ class _EditQuestionScreenState extends ConsumerState<EditQuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Question'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width > 900;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headingColor = isDark ? Colors.white : const Color(0xFF1F2937);
+    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+    final cardBg = Theme.of(context).cardTheme.color ?? (isDark ? const Color(0xFF111827) : Colors.white);
+    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+
+    Widget buildBody() {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Edit Question Builder',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: headingColor),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Modify question parameters, options, and correctness tags.',
+                    style: TextStyle(fontSize: 15, color: subtitleColor),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Type & difficulty meta-card
+                  _buildMetaCard(cardBg, borderColor, headingColor, subtitleColor),
+                  const SizedBox(height: 20),
+
+                  // Content card
+                  _buildContentCard(cardBg, borderColor, headingColor, subtitleColor),
+                  const SizedBox(height: 20),
+
+                  // Option selections card
+                  _buildOptionsCard(cardBg, borderColor, headingColor, subtitleColor, isDark),
+                  const SizedBox(height: 32),
+
+                  SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _save,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D9488),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Save Question Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (isDesktop) {
+      return Scaffold(
+        body: Row(
           children: [
-            DropdownButtonFormField<QuestionType>(
-              initialValue: _type,
-              decoration: const InputDecoration(
-                labelText: 'Question Type',
-                border: OutlineInputBorder(),
+            const AdminSidebar(),
+            Expanded(
+              child: Scaffold(
+                appBar: const AdminAppBar(title: 'Edit Question', showLeading: false),
+                body: buildBody(),
               ),
-              items: QuestionType.values
-                  .map(
-                    (t) => DropdownMenuItem(
-                      value: t,
-                      child: Text(t.name.toUpperCase()),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (val) {
-                setState(() {
-                  _type = val!;
-                  if (_type == QuestionType.trueFalse) {
-                    _optionControllers.clear();
-                    _optionControllers.add(TextEditingController(text: 'True'));
-                    _optionControllers.add(
-                      TextEditingController(text: 'False'),
-                    );
-                  }
-                  _correctIndices.clear();
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _subjectController,
-              decoration: const InputDecoration(
-                labelText: 'Subject (e.g., Mathematics, Physics)',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) => v!.isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _textController,
-              decoration: const InputDecoration(
-                labelText: 'Question Text',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-              validator: (v) => v!.isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Options',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const Text('Check the circle/box to mark as correct'),
-            const SizedBox(height: 8),
-            ..._optionControllers.asMap().entries.map((entry) {
-              final index = entry.key;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: _correctIndices.contains(index),
-                      onChanged: (_) => _toggleCorrect(index),
-                      shape: _type == QuestionType.multiple
-                          ? null
-                          : const CircleBorder(),
-                    ),
-                    Expanded(
-                      child: TextFormField(
-                        controller: entry.value,
-                        readOnly: _type == QuestionType.trueFalse,
-                        decoration: InputDecoration(
-                          labelText: 'Option ${index + 1}',
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                    ),
-                    if (_type != QuestionType.trueFalse)
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => _removeOption(index),
-                      ),
-                  ],
-                ),
-              );
-            }),
-            if (_type != QuestionType.trueFalse)
-              TextButton.icon(
-                onPressed: _addOption,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Option'),
-              ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _explanationController,
-              decoration: const InputDecoration(
-                labelText: 'Explanation (Optional)',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _save,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-              ),
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Save Question'),
             ),
           ],
         ),
+      );
+    }
+
+    return Scaffold(
+      appBar: const AdminAppBar(title: 'Edit Question'),
+      drawer: const AdminDrawer(),
+      body: buildBody(),
+    );
+  }
+
+  Widget _buildMetaCard(Color cardBg, Color borderColor, Color headingColor, Color subtitleColor) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Question Properties', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: headingColor)),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<QuestionType>(
+                  initialValue: _type,
+                  style: TextStyle(color: headingColor),
+                  dropdownColor: cardBg,
+                  decoration: InputDecoration(
+                    labelText: 'Evaluation Style',
+                    labelStyle: TextStyle(color: subtitleColor),
+                  ),
+                  items: QuestionType.values
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t.name.toUpperCase())))
+                      .toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      _type = val!;
+                      if (_type == QuestionType.trueFalse) {
+                        _optionControllers.clear();
+                        _optionControllers.add(TextEditingController(text: 'True'));
+                        _optionControllers.add(TextEditingController(text: 'False'));
+                      }
+                      _correctIndices.clear();
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButtonFormField<DifficultyLevel>(
+                  initialValue: _difficulty,
+                  style: TextStyle(color: headingColor),
+                  dropdownColor: cardBg,
+                  decoration: InputDecoration(
+                    labelText: 'Difficulty Level',
+                    labelStyle: TextStyle(color: subtitleColor),
+                  ),
+                  items: DifficultyLevel.values
+                      .map((d) => DropdownMenuItem(value: d, child: Text(d.name.toUpperCase())))
+                      .toList(),
+                  onChanged: (val) => setState(() => _difficulty = val!),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _subjectController,
+            style: TextStyle(color: headingColor),
+            decoration: InputDecoration(
+              labelText: 'Subject (e.g. Mathematics, General Science)',
+              labelStyle: TextStyle(color: subtitleColor),
+              prefixIcon: Icon(Icons.subject, color: subtitleColor),
+            ),
+            validator: (v) => v!.isEmpty ? 'Required field' : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentCard(Color cardBg, Color borderColor, Color headingColor, Color subtitleColor) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Question Content', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: headingColor)),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _textController,
+            maxLines: 3,
+            style: TextStyle(color: headingColor),
+            decoration: InputDecoration(
+              labelText: 'Write the question text here...',
+              labelStyle: TextStyle(color: subtitleColor),
+              alignLabelWithHint: true,
+            ),
+            validator: (v) => v!.isEmpty ? 'Required field' : null,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _explanationController,
+            maxLines: 2,
+            style: TextStyle(color: headingColor),
+            decoration: InputDecoration(
+              labelText: 'Add optional explanation / answer logic...',
+              labelStyle: TextStyle(color: subtitleColor),
+              alignLabelWithHint: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionsCard(Color cardBg, Color borderColor, Color headingColor, Color subtitleColor, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Option Choices', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: headingColor)),
+          const SizedBox(height: 6),
+          Text('Check the circle/box on the left to designate correct responses.', style: TextStyle(color: subtitleColor, fontSize: 13)),
+          const SizedBox(height: 20),
+          ..._optionControllers.asMap().entries.map((entry) {
+            final idx = entry.key;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _correctIndices.contains(idx),
+                    onChanged: (_) => _toggleCorrect(idx),
+                    shape: _type == QuestionType.multiple ? null : const CircleBorder(),
+                    activeColor: const Color(0xFF0D9488),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      controller: entry.value,
+                      readOnly: _type == QuestionType.trueFalse,
+                      style: TextStyle(color: headingColor),
+                      decoration: InputDecoration(
+                        labelText: 'Option Choice ${String.fromCharCode(65 + idx)}',
+                        labelStyle: TextStyle(color: subtitleColor),
+                      ),
+                      validator: (v) => v!.isEmpty ? 'Required field' : null,
+                    ),
+                  ),
+                  if (_type != QuestionType.trueFalse)
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
+                      onPressed: () => _removeOption(idx),
+                    ),
+                ],
+              ),
+            );
+          }),
+          if (_type != QuestionType.trueFalse)
+            TextButton.icon(
+              onPressed: _addOption,
+              icon: const Icon(Icons.add, color: Color(0xFF0D9488)),
+              label: const Text('Add Option Row', style: TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold)),
+            ),
+        ],
       ),
     );
   }

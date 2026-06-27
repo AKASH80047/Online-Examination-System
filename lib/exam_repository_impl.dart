@@ -84,6 +84,7 @@ class ExamRepositoryImpl implements ExamRepository {
       imageUrl: question.imageUrl,
       type: question.type,
       subject: question.subject,
+      difficulty: question.difficulty,
     );
     await remoteDataSource.addQuestion(examId, questionModel);
   }
@@ -99,6 +100,7 @@ class ExamRepositoryImpl implements ExamRepository {
       imageUrl: question.imageUrl,
       type: question.type,
       subject: question.subject,
+      difficulty: question.difficulty,
     );
     await remoteDataSource.updateQuestion(examId, questionModel);
   }

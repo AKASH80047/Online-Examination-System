@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:exam_paper/exam_providers.dart';
+import 'package:exam_paper/user_providers.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   final String examId;
@@ -23,7 +24,16 @@ class LeaderboardScreen extends ConsumerWidget {
               final result = results[index];
               return ListTile(
                 leading: CircleAvatar(child: Text('${index + 1}')),
-                title: Text(result.userId),
+                title: Consumer(
+                  builder: (context, ref, child) {
+                    final userAsync = ref.watch(userProfileProvider(result.userId));
+                    return userAsync.when(
+                      data: (user) => Text(user?.name ?? 'Student (${result.userId.substring(0, 5)}...)'),
+                      loading: () => const Text('Loading student...'),
+                      error: (e, s) => Text(result.userId),
+                    );
+                  },
+                ),
                 subtitle: Text('Score: ${result.score} / ${result.totalMarks}'),
                 trailing: result.isPassed
                     ? const Icon(Icons.check_circle, color: Colors.green)

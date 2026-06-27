@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 enum QuestionType { single, multiple, trueFalse }
 
+enum DifficultyLevel { easy, medium, hard }
+
 class QuestionEntity extends Equatable {
   final String id;
   final String text;
@@ -11,6 +13,7 @@ class QuestionEntity extends Equatable {
   final String? imageUrl;
   final QuestionType type;
   final String subject;
+  final DifficultyLevel difficulty;
 
   const QuestionEntity({
     required this.id,
@@ -21,6 +24,7 @@ class QuestionEntity extends Equatable {
     this.imageUrl,
     required this.type,
     required this.subject,
+    this.difficulty = DifficultyLevel.medium,
   });
 
   @override
@@ -33,5 +37,6 @@ class QuestionEntity extends Equatable {
     imageUrl,
     type,
     subject,
+    difficulty,
   ];
 }

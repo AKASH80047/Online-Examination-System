@@ -34,10 +34,11 @@ class ResultRepositoryImpl implements ResultRepository {
     final snapshot = await _firestore
         .collection('results')
         .where('userId', isEqualTo: userId)
-        .orderBy('timestamp', descending: true)
         .get();
 
-    return snapshot.docs.map((doc) => ResultModel.fromFirestore(doc)).toList();
+    final results = snapshot.docs.map((doc) => ResultModel.fromFirestore(doc)).toList();
+    results.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return results;
   }
 
   @override
@@ -48,10 +49,14 @@ class ResultRepositoryImpl implements ResultRepository {
     final snapshot = await _firestore
         .collection('results')
         .where('examId', isEqualTo: examId)
-        .orderBy('score', descending: true)
-        .limit(limit)
         .get();
 
-    return snapshot.docs.map((doc) => ResultModel.fromFirestore(doc)).toList();
+    final results = snapshot.docs.map((doc) => ResultModel.fromFirestore(doc)).toList();
+    results.sort((a, b) => b.score.compareTo(a.score));
+    
+    if (results.length > limit) {
+      return results.sublist(0, limit);
+    }
+    return results;
   }
 }

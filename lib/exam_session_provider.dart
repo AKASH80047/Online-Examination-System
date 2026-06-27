@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:collection/collection.dart';
 import 'package:exam_paper/exam_entity.dart';
 import 'package:exam_paper/question_entity.dart';
 import 'package:exam_paper/result_entity.dart';
@@ -205,7 +204,7 @@ final activeExamSessionProvider =
     >((ref, examId) {
       // Watch the async values for initial data load.
       // Use .select to only rebuild if the value changes, not just the AsyncValue state.
-      final examsAsync = ref.watch(publishedExamsProvider);
+      final examAsync = ref.watch(examDetailProvider(examId));
       final questionsAsync = ref.watch(examQuestionsProvider(examId));
 
       final resultRepo = ref.watch(resultRepositoryProvider);
@@ -214,10 +213,10 @@ final activeExamSessionProvider =
       final userId = ref.read(authStateProvider).value?.uid;
 
       // Ensure both exam data and questions are ready before starting the session
-      final exam = examsAsync.value?.firstWhereOrNull((e) => e.id == examId);
+      final exam = examAsync.value;
       final questions = questionsAsync.value;
 
-      if (examsAsync.isLoading || questionsAsync.isLoading) {
+      if (examAsync.isLoading || questionsAsync.isLoading) {
         throw Exception('Loading exam data...');
       }
 

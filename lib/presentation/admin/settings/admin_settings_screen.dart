@@ -12,32 +12,37 @@ class AdminSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isDesktop = width > 900;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headingColor = isDark ? Colors.white : const Color(0xFF1F2937);
+    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+    final cardBg = Theme.of(context).cardTheme.color ?? (isDark ? const Color(0xFF111827) : Colors.white);
+    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
 
     Widget buildBody() {
       return ListView(
         padding: const EdgeInsets.all(32),
         children: [
           // Header
-          const Text(
+          Text(
             'System Settings',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: headingColor),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Manage application configuration, roles, and preferences.',
-            style: TextStyle(fontSize: 15, color: Color(0xFF6B7280)),
+            style: TextStyle(fontSize: 15, color: subtitleColor),
           ),
           const SizedBox(height: 32),
 
           _SettingsSection(
             title: 'Application',
             icon: Icons.settings_applications_rounded,
-            iconColor: const Color(0xFF4F46E5),
+            iconColor: const Color(0xFF0D9488), // Teal Theme Accent
             items: [
               _SettingsTile(
                 icon: Icons.tune_rounded,
-                iconColor: const Color(0xFF4F46E5),
-                iconBg: const Color(0xFFEEF2FF),
+                iconColor: const Color(0xFF0D9488),
+                iconBg: const Color(0xFF0D9488).withValues(alpha: 0.1),
                 title: 'Application Configuration',
                 subtitle: 'Global variables, firebase flags, maintenance mode',
                 onTap: () => context.push(RoutePaths.adminAppConfig),
@@ -45,7 +50,7 @@ class AdminSettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.vpn_key_rounded,
                 iconColor: const Color(0xFF8B5CF6),
-                iconBg: const Color(0xFFF5F3FF),
+                iconBg: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
                 title: 'Roles & Permissions',
                 subtitle: 'User role access control list summary',
                 onTap: () => context.push(RoutePaths.adminRolesPermission),
@@ -63,11 +68,11 @@ class AdminSettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.dark_mode_rounded,
                 iconColor: const Color(0xFFF59E0B),
-                iconBg: const Color(0xFFFEF3C7),
+                iconBg: const Color(0xFFF59E0B).withValues(alpha: 0.1),
                 title: 'Theme Mode',
                 subtitle: 'Switch between light and dark display',
                 trailing: Switch(
-                  value: Theme.of(context).brightness == Brightness.dark,
+                  value: isDark,
                   onChanged: (val) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -81,7 +86,7 @@ class AdminSettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.language_rounded,
                 iconColor: const Color(0xFF10B981),
-                iconBg: const Color(0xFFD1FAE5),
+                iconBg: const Color(0xFF10B981).withValues(alpha: 0.1),
                 title: 'Language',
                 subtitle: 'English (United States)',
                 onTap: () {},
@@ -99,7 +104,7 @@ class AdminSettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.backup_rounded,
                 iconColor: const Color(0xFF3B82F6),
-                iconBg: const Color(0xFFEFF6FF),
+                iconBg: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                 title: 'Data Backup',
                 subtitle: 'Export and backup all platform data',
                 onTap: () {},
@@ -107,7 +112,7 @@ class AdminSettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.privacy_tip_rounded,
                 iconColor: const Color(0xFFEF4444),
-                iconBg: const Color(0xFFFEE2E2),
+                iconBg: const Color(0xFFEF4444).withValues(alpha: 0.1),
                 title: 'Privacy Policy',
                 subtitle: 'View and manage privacy settings',
                 onTap: () {},
@@ -120,18 +125,18 @@ class AdminSettingsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
+              color: cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: borderColor, width: 1.5),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.info_outline, color: Color(0xFF6B7280)),
-                SizedBox(width: 12),
+                Icon(Icons.info_outline, color: subtitleColor),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Version 1.0.0 • ExamPortal Admin • © 2026',
-                    style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(fontSize: 13, color: subtitleColor),
                   ),
                 ),
               ],
@@ -143,13 +148,11 @@ class AdminSettingsScreen extends StatelessWidget {
 
     if (isDesktop) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF9FAFB),
         body: Row(
           children: [
             const AdminSidebar(),
             Expanded(
               child: Scaffold(
-                backgroundColor: const Color(0xFFF9FAFB),
                 appBar: const AdminAppBar(title: 'Settings', showLeading: false),
                 body: buildBody(),
               ),
@@ -160,7 +163,6 @@ class AdminSettingsScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
       appBar: const AdminAppBar(title: 'Settings'),
       drawer: const AdminDrawer(),
       body: buildBody(),
@@ -183,6 +185,10 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = Theme.of(context).cardTheme.color ?? (isDark ? const Color(0xFF111827) : Colors.white);
+    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,15 +210,18 @@ class _SettingsSection extends StatelessWidget {
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardBg,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            border: Border.all(color: borderColor, width: 1.5),
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
           ),
           child: Column(
             children: items.asMap().entries.map((entry) {
@@ -220,7 +229,7 @@ class _SettingsSection extends StatelessWidget {
               final item = entry.value;
               return Column(
                 children: [
-                  if (idx > 0) const Divider(height: 1, indent: 68),
+                  if (idx > 0) Divider(height: 1, indent: 68, color: borderColor),
                   item,
                 ],
               );
@@ -253,6 +262,11 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headingColor = isDark ? Colors.white : const Color(0xFF1F2937);
+    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+    final chevronColor = isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -275,13 +289,13 @@ class _SettingsTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF1F2937))),
+                    Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: headingColor)),
                     const SizedBox(height: 2),
-                    Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280))),
+                    Text(subtitle, style: TextStyle(fontSize: 12, color: subtitleColor)),
                   ],
                 ),
               ),
-              trailing ?? (onTap != null ? const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF9CA3AF)) : const SizedBox()),
+              trailing ?? (onTap != null ? Icon(Icons.arrow_forward_ios, size: 14, color: chevronColor) : const SizedBox()),
             ],
           ),
         ),

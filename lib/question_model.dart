@@ -11,6 +11,7 @@ class QuestionModel extends QuestionEntity {
     super.imageUrl,
     required super.type,
     required super.subject,
+    required super.difficulty,
   });
 
   factory QuestionModel.fromFirestore(DocumentSnapshot doc) {
@@ -19,15 +20,21 @@ class QuestionModel extends QuestionEntity {
       id: doc.id,
       text: data['text'] ?? '',
       options: List<String>.from(data['options'] ?? []),
-      correctOptionIndices: List<int>.from(data['correctOptionIndices'] ?? []),
+      correctOptionIndices: (data['correctOptionIndices'] as List?)
+              ?.map((e) => (e as num).toInt())
+              .toList() ??
+          const [],
       explanation: data['explanation'],
       imageUrl: data['imageUrl'],
       type: QuestionType.values.firstWhere(
         (e) => e.name == data['type'],
-        orElse: () =>
-            QuestionType.single, // Default to single if type is not found
+        orElse: () => QuestionType.single,
       ),
       subject: data['subject'] ?? '',
+      difficulty: DifficultyLevel.values.firstWhere(
+        (e) => e.name == data['difficulty'],
+        orElse: () => DifficultyLevel.medium,
+      ),
     );
   }
 
@@ -40,6 +47,7 @@ class QuestionModel extends QuestionEntity {
       'imageUrl': imageUrl,
       'type': type.name,
       'subject': subject,
+      'difficulty': difficulty.name,
     };
   }
 
@@ -52,5 +60,6 @@ class QuestionModel extends QuestionEntity {
     imageUrl: imageUrl,
     type: type,
     subject: subject,
+    difficulty: difficulty,
   );
 }
